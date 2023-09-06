@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Recom Ventilation",
+        "description": "",
+        "data": {
+          "name": "The prefix to be used for your Recom sensors",
+          "host": "Host or IP address of the ventilation unit",
+          "port": "Modbus port",
+          "scan_interval": "Scan interval"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Invalid hostname or IP address."
+    },
+    "abort": {}
+  }
+}

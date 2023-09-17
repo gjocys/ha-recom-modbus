@@ -1,4 +1,4 @@
-# ha-recom-modbus
+# ![](https://github.com/gjocys/ha-recom-modbus/blob/main/icon.png) ha-recom-modbus
 
 ## Home Assistant integration for REC Indovent Recom ventilation units via Modbus TCP/IP
 

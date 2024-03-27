@@ -4,6 +4,16 @@
 
 This component enables communication between Home Assistant and Rec Indovent Recom ventilation units via Modbus TCP/IP.
 
+Supported devices:
+
+- RECOM 2 SR EC
+- RECOM 3 SR EC
+- RECOM 4 SR EC
+- RECOM 6 SR EC
+- RECOM 2 RT EC
+- RECOM 4 RT EC (tested)
+- RECOM 6 RT EC
+
 Features:
 
 - Turn unit on/off

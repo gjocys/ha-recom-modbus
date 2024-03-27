@@ -74,7 +74,8 @@ class RecomFanEntity(FanEntity):
         """Add callbacks"""
         self._hub.async_add_entity(self, self.update_callback)
 
-    async def async_turn_on(self):
+    # Fix for HA 2023.12.2 async_turn_on stopped working
+    async def async_turn_on(self, percentage: str = None, preset_mode: str = None, **kwargs):
         self._hub.fan_turn_on(self)
     
     async def async_turn_off(self):

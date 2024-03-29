@@ -1,4 +1,4 @@
-# ![](https://github.com/gjocys/ha-recom-modbus/blob/main/icon.png) ha-recom-modbus
+# <img src="https://github.com/gjocys/ha-recom-modbus/blob/master/icon.png" width="100"> ha-recom-modbus
 
 ## Home Assistant integration for REC Indovent Recom ventilation units via Modbus TCP/IP
 
@@ -20,7 +20,7 @@ Features:
 - Select preconfigured fan speed mode
 - Manual fan speed adjustment
 
-![](https://github.com/gjocys/ha-recom-modbus/blob/main/fan.png)
+![](https://github.com/gjocys/ha-recom-modbus/blob/master/fan.png)
 
 Sensors:
 | Sensor | Unit of measurement | Note |
@@ -35,7 +35,7 @@ Sensors:
 | Supply fan speed | rpm | |
 | Exhaust fan speed | rpm | |
 
-![](https://github.com/gjocys/ha-recom-modbus/blob/main/sensors.png)
+![](https://github.com/gjocys/ha-recom-modbus/blob/master/sensors.png)
 
 # Installation
 
@@ -53,4 +53,4 @@ Download the zip / tar.gz from the release page.
 
 After rebooting Home Assistant, this integration can be enabled via UI (Settings -> Devices & Services -> Add Integration)
 
-![](https://github.com/gjocys/ha-recom-modbus/blob/main/add_integration.png)
+![](https://github.com/gjocys/ha-recom-modbus/blob/master/add_integration.png)

@@ -1,4 +1,4 @@
-from homeassistant.const import CONF_NAME, CONF_HOST, CONF_PORT, TEMP_CELSIUS, REVOLUTIONS_PER_MINUTE, PERCENTAGE
+from homeassistant.const import CONF_NAME, CONF_HOST, CONF_PORT, UnitOfTemperature, REVOLUTIONS_PER_MINUTE, PERCENTAGE
 
 DOMAIN = "recom"
 DEFAULT_NAME = "recom"
@@ -30,11 +30,11 @@ FAN_SPEED_MODES = {
 }
 
 SENSOR_TYPES = {
-    "IR_CurSelTEMP": ["Temperature Setpoint", 0, TEMP_CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
-    "IR_CurTEMP_SuAirIn": ["Intake Air Temperature",  1, TEMP_CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
-    "IR_CurTEMP_SuAirOut": ["Supply Air Temperature", 2, TEMP_CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
-    "IR_CurTEMP_ExAirIn": ["Extract Air Temperature", 3, TEMP_CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
-    "IR_CurTEMP_ExAirOut": ["Exhaust Air Temperature",4, TEMP_CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
+    "IR_CurSelTEMP": ["Temperature Setpoint", 0, UnitOfTemperature.CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
+    "IR_CurTEMP_SuAirIn": ["Intake Air Temperature",  1, UnitOfTemperature.CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
+    "IR_CurTEMP_SuAirOut": ["Supply Air Temperature", 2, UnitOfTemperature.CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
+    "IR_CurTEMP_ExAirIn": ["Extract Air Temperature", 3, UnitOfTemperature.CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
+    "IR_CurTEMP_ExAirOut": ["Exhaust Air Temperature",4, UnitOfTemperature.CELSIUS, DIVIDE_VALUE_BY_10, MODBUS_INPUT_REGISTER, "mdi:thermometer"],
     "IR_SuRPM": ["Supply Fan Speed", 23, REVOLUTIONS_PER_MINUTE, DONT_DIVIDE_VALUE, MODBUS_INPUT_REGISTER, "mdi:speedometer"],
     "IR_ExRPM": ["Extract Fan Speed", 24, REVOLUTIONS_PER_MINUTE, DONT_DIVIDE_VALUE, MODBUS_INPUT_REGISTER, "mdi:speedometer"],
     "IR_CurVBAT": ["Internal Battery", 9, VOLT, DIVIDE_VALUE_BY_1000, MODBUS_INPUT_REGISTER, "mdi:battery"],

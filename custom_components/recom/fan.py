@@ -133,7 +133,12 @@ class RecomFanEntity(FanEntity):
 
     @property
     def supported_features(self) ->int:
-        return FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
+        return (
+            FanEntityFeature.SET_SPEED
+            | FanEntityFeature.PRESET_MODE
+            | FanEntityFeature.TURN_ON
+            | FanEntityFeature.TURN_OFF
+        )
 
     @property
     def should_poll(self) -> bool:

@@ -13,7 +13,7 @@ from homeassistant import core
 from homeassistant.core import HomeAssistant 
 from homeassistant.core import callback
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME, CONF_HOST, CONF_PORT, CONF_SCAN_INTERVAL
+from homeassistant.const import CONF_NAME, CONF_HOST, CONF_PORT, CONF_SCAN_INTERVAL, Platform
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import (
@@ -30,6 +30,11 @@ from .const import (
 
 import logging
 _LOGGER = logging.getLogger(__name__)
+
+PLATFORMS: list[Platform] = [
+    Platform.FAN,
+    Platform.SENSOR,
+]
 
 def validator(instance, divide_by = 1):
     if not instance.isError():
@@ -66,8 +71,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Register the hub."""
     hass.data[DOMAIN][name] = {"hub": hub}
 
-    hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "fan"))
-    hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
+    await hass.async_create_task(
+        hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    )
     
     return True
 

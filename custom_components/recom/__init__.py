@@ -61,10 +61,10 @@ async def async_setup(hass, config):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up recom modbus."""
-    host = entry.data[CONF_HOST]
-    port = entry.data[CONF_PORT]
-    name = entry.data[CONF_NAME]
-    scan_interval = entry.data[CONF_SCAN_INTERVAL]
+    host = entry.options.get(CONF_HOST, entry.data[CONF_HOST])
+    port = entry.options.get(CONF_PORT, entry.data[CONF_PORT])
+    name = entry.data[CONF_NAME]  # keep name from data (unique_id/title)
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, entry.data[CONF_SCAN_INTERVAL])
 
     hub = RecomModbusHub(
         hass, name, host, port, scan_interval

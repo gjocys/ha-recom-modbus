@@ -1,5 +1,8 @@
 # <img src="https://github.com/gjocys/ha-recom-modbus/blob/master/icon.png" width="100"> ha-recom-modbus
 
+[![HACS Action](https://github.com/gjocys/ha-recom-modbus/actions/workflows/hacs-action.yml/badge.svg?branch=master)](https://github.com/gjocys/ha-recom-modbus/actions/workflows/hacs-action.yml)
+[![Validate with hassfest](https://github.com/gjocys/ha-recom-modbus/actions/workflows/validate-with-hassfest.yml/badge.svg?branch=master)](https://github.com/gjocys/ha-recom-modbus/actions/workflows/validate-with-hassfest.yml)
+
 ## Home Assistant integration for REC Indovent Recom ventilation units via Modbus TCP/IP
 
 This component enables communication between Home Assistant and Rec Indovent Recom ventilation units via Modbus TCP/IP.

@@ -1,4 +1,4 @@
-import asyncio
+import inspect
 import json
 import threading
 from typing import Optional
@@ -101,6 +101,21 @@ class RecomModbusHub:
         self._fans = []
         self._entities = []
         self.data = {}
+        self._id_kw = self._detect_device_kw()
+        self._id_kwargs = {self._id_kw: 1}
+
+    def _detect_device_kw(self) -> str:
+        """Detect whether pymodbus expects device_id= (>=3.10) or slave=/unit= (older)."""
+        try:
+            sig = inspect.signature(self._client.read_holding_registers)
+            params = sig.parameters
+            if "device_id" in params:
+                return "device_id"
+            if "slave" in params:
+                return "slave"
+        except Exception:
+            pass
+        return "slave"
 
     # ---------- connection + retry helpers ----------
 
@@ -166,7 +181,7 @@ class RecomModbusHub:
     def read_input_registers(self, address, divide_value_by):
         res = self._call_with_retry(
             self._client.read_input_registers,
-            address=address, count=1, slave=1
+            address=address, count=1, **self._id_kwargs
         )
         if res is None:
             return None
@@ -175,7 +190,7 @@ class RecomModbusHub:
     def read_holding_registers(self, address, divide_value_by = 1):
         res = self._call_with_retry(
             self._client.read_holding_registers,
-            address=address, count=1, slave=1
+            address=address, count=1, **self._id_kwargs
         )
         if res is None:
             return None
@@ -184,7 +199,7 @@ class RecomModbusHub:
     def read_coils(self, address):
         res = self._call_with_retry(
             self._client.read_coils,
-            address=address, count=1, slave=1
+            address=address, count=1, **self._id_kwargs
         )
         if res is None:
             return None
@@ -252,23 +267,23 @@ class RecomModbusHub:
                 mode = key
 
         if mode is not None:
-            _ = self._call_with_retry(self._client.write_register, 2, mode, slave=1)
+            _ = self._call_with_retry(self._client.write_register, 2, mode, **self._id_kwargs)
             self.data[entity.name]['speed_mode'] = new_mode
             return entity.update_callback()
         return
 
     def fan_set_percentage(self, entity, percentage):
-        _ = self._call_with_retry(self._client.write_register, entity.manual_speed_address, percentage, slave=1)
+        _ = self._call_with_retry(self._client.write_register, entity.manual_speed_address, percentage, **self._id_kwargs)
         self.data[entity.name]["manual_speed"] = percentage
         return entity.update_callback()
 
     def fan_turn_on(self, entity):
-        _ = self._call_with_retry(self._client.write_coil, entity.on_off_address, 1, slave=1)
+        _ = self._call_with_retry(self._client.write_coil, entity.on_off_address, 1, **self._id_kwargs)
         self.data[entity.name]["on_off"] = 1
         return entity.update_callback()
 
     def fan_turn_off(self, entity):
-        _ = self._call_with_retry(self._client.write_coil, entity.on_off_address, 0, slave=1)
+        _ = self._call_with_retry(self._client.write_coil, entity.on_off_address, 0, **self._id_kwargs)
         self.data[entity.name]["on_off"] = 0
         return entity.update_callback()
 

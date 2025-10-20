@@ -1,7 +1,7 @@
 {
   "domain": "recom",
   "name": "REC Indovent Recom",
-  "codeowners": ["@gjocys"],
+  "codeowners": ["@gjocys", "@bdimir"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/gjocys/ha-recom-modbus/",

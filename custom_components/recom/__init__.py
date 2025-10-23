@@ -70,6 +70,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass, name, host, port, scan_interval
     )
 
+    try:
+        await hass.async_add_executor_job(hub.connect)
+    except Exception as e:
+        _LOGGER.warning("Failed to connect to Modbus device %s:%s : %s", host, port, str(e))
+        
     """Register the hub."""
     hass.data[DOMAIN][name] = {"hub": hub}
 
@@ -167,11 +172,35 @@ class RecomModbusHub:
                 _LOGGER.warning("Unexpected Modbus error (suppressed): %s", e)
                 return None
 
+    def _write_and_update(self, entity, write_func, *write_args, write_kwargs=None, update_fn=None):
+        write_kwargs = write_kwargs or {}
+        res = self._call_with_retry(write_func, *write_args, **write_kwargs)
+        if res is None:
+            _LOGGER.warning("Modbus write failed for %s", getattr(entity, "name", "<unknown>"))
+            return False
+
+        with self._lock:
+            data = self.data.setdefault(entity.name, {})
+            if callable(update_fn):
+                try:
+                    update_fn(data)
+                except Exception as e:
+                    _LOGGER.exception("Error running update_fn for %s: %s", entity.name, e)
+
+        try:
+            self._hass.add_job(entity.update_callback)
+        except Exception:
+            try:
+                self._hass.loop.call_soon_threadsafe(entity.update_callback)
+            except Exception:
+                _LOGGER.exception("Failed to schedule entity update_callback")
+
+        return True
+
     @callback
     def async_add_entity(self, entity, update_callback):
         """Listen for data updates."""
         if not self._entities:
-            self.connect()
             self._unsub_interval_method_entity = async_track_time_interval(
                 self._hass, self.async_refresh_modbus_data_entity, self._scan_interval
             )
@@ -225,7 +254,13 @@ class RecomModbusHub:
 
             if entity.name not in self.data or self.data[entity.name] != update_result:
                 self.data[entity.name] = update_result
-                entity.update_callback()
+                try:
+                    self._hass.add_job(entity.update_callback)
+                except Exception:
+                    try:
+                        self._hass.loop.call_soon_threadsafe(entity.update_callback)
+                    except Exception:
+                        _LOGGER.exception("Failed to schedule entity update_callback")
 
     def refresh_fan(self):
         entities = filter(lambda x: x.entity_type == ENTITY_FAN, self._entities)
@@ -250,15 +285,37 @@ class RecomModbusHub:
             if manual_speed == False:
                 manual_speed = 0
             self.data[entity.name]["manual_speed"] = manual_speed
-            entity.update_callback()
+            try:
+                self._hass.add_job(entity.update_callback)
+            except Exception:
+                try:
+                    self._hass.loop.call_soon_threadsafe(entity.update_callback)
+                except Exception:
+                    _LOGGER.exception("Failed to schedule entity update_callback")
+
+    def _do_refresh(self):
+        if not self._entities:
+            return
+
+        try:
+            self.refresh_sensor()
+        except Exception as e:
+            _LOGGER.debug("Error in refresh_sensor: %s", e)
+
+        try:
+            self.refresh_fan()
+        except Exception as e:
+            _LOGGER.debug("Error in refresh_fan: %s", e)
 
     async def async_refresh_modbus_data_entity(self, _now: Optional[int] = None) -> None:
         """Time to update."""
         if not self._entities:
             return
-
-        self.refresh_sensor()
-        self.refresh_fan()
+        
+        try:
+            await self._hass.async_add_executor_job(self._do_refresh)
+        except Exception as e:
+            _LOGGER.error("Error refreshing Modbus data: %s", e)
 
     def fan_speed_change_mode(self, entity, new_mode: str):
         """ find speed mode number by ENUM """
@@ -269,23 +326,45 @@ class RecomModbusHub:
         if mode is not None:
             _ = self._call_with_retry(self._client.write_register, 2, mode, **self._id_kwargs)
             self.data[entity.name]['speed_mode'] = new_mode
-            return entity.update_callback()
+            try:
+                self._hass.add_job(entity.update_callback)
+            except Exception:
+                try:
+                    self._hass.loop.call_soon_threadsafe(entity.update_callback)
+                except Exception:
+                    _LOGGER.exception("Failed to schedule entity update_callback")
+            return
         return
 
     def fan_set_percentage(self, entity, percentage):
-        _ = self._call_with_retry(self._client.write_register, entity.manual_speed_address, percentage, **self._id_kwargs)
-        self.data[entity.name]["manual_speed"] = percentage
-        return entity.update_callback()
+        return self._write_and_update(
+            entity,
+            self._client.write_register,
+            entity.manual_speed_address,
+            percentage,
+            write_kwargs=self._id_kwargs,
+            update_fn=lambda d: d.__setitem__("manual_speed", percentage),
+        )
 
     def fan_turn_on(self, entity):
-        _ = self._call_with_retry(self._client.write_coil, entity.on_off_address, 1, **self._id_kwargs)
-        self.data[entity.name]["on_off"] = 1
-        return entity.update_callback()
+        return self._write_and_update(
+            entity,
+            self._client.write_coil,
+            entity.on_off_address,
+            1,
+            write_kwargs=self._id_kwargs,
+            update_fn=lambda d: d.__setitem__("on_off", 1),
+        )
 
     def fan_turn_off(self, entity):
-        _ = self._call_with_retry(self._client.write_coil, entity.on_off_address, 0, **self._id_kwargs)
-        self.data[entity.name]["on_off"] = 0
-        return entity.update_callback()
+        return self._write_and_update(
+            entity,
+            self._client.write_coil,
+            entity.on_off_address,
+            0,
+            write_kwargs=self._id_kwargs,
+            update_fn=lambda d: d.__setitem__("on_off", 0),
+        )
 
     def connect(self):
         """Connect client."""
